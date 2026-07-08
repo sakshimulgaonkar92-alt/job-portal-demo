@@ -1,28 +1,34 @@
 import { useState } from 'react';
 import './auth.css';
 
-export default function Login({ onLogin, onNavigateSignup }) {
+export default function Signup({ onSignup, onNavigateLogin }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [feedback, setFeedback] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
   function handleSubmit(e) {
     e.preventDefault();
 
-    if (!email || !password) {
-      setFeedback({ type: 'error', message: 'Please enter both email and password.' });
+    if (!email || !password || !confirmPassword) {
+      setFeedback({ type: 'error', message: 'Please fill in all fields.' });
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setFeedback({ type: 'error', message: 'Passwords do not match.' });
       return;
     }
 
     setSubmitting(true);
     setFeedback(null);
 
-    // Replace with real auth call
+    // Replace with real signup call
     setTimeout(() => {
       setSubmitting(false);
-      setFeedback({ type: 'success', message: 'Signed in successfully.' });
-      onLogin?.({ email, password });
+      setFeedback({ type: 'success', message: 'Account created successfully.' });
+      onSignup?.({ email, password });
     }, 600);
   }
 
@@ -43,8 +49,8 @@ export default function Login({ onLogin, onNavigateSignup }) {
         </div>
 
         {/* Heading */}
-        <h1 className="lp-h1">Login Here</h1>
-        <p className="lp-sub">Welcome back you've been missed!</p>
+        <h1 className="lp-h1">Create Account</h1>
+        <p className="lp-sub">Create an account so you can explore all the existing jobs</p>
 
         {/* Feedback */}
         {feedback && (
@@ -78,23 +84,33 @@ export default function Login({ onLogin, onNavigateSignup }) {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
+              autoComplete="new-password"
             />
           </div>
 
-          <button type="button" className="lp-forgot">
-            Forgot your password?
-          </button>
+          <div className="lp-field">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+            <input
+              type="password"
+              placeholder="Confirm Password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              autoComplete="new-password"
+            />
+          </div>
 
-          <button type="submit" className="lp-btn-primary" disabled={submitting}>
-            {submitting ? 'Signing in…' : 'Sign in'}
+          <button type="submit" className="lp-btn-primary" disabled={submitting} style={{ marginTop: 4 }}>
+            {submitting ? 'Creating account…' : 'Sign up'}
           </button>
         </form>
 
         <p className="lp-divider">Or continue with</p>
 
-        <button className="lp-switch" onClick={onNavigateSignup}>
-          Don't have an account? <strong>Sign up</strong>
+        <button className="lp-switch" onClick={onNavigateLogin}>
+          Already have an account? <strong>Sign in</strong>
         </button>
       </div>
     </div>
