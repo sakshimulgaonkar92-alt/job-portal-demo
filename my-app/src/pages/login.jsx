@@ -1,17 +1,57 @@
-import { useState } from 'react';
-import './auth.css';
+import { useState } from "react";
+import {
+  GraduationCap,
+  Building2,
+  Briefcase,
+  Eye,
+  EyeOff,
+  ArrowRight,
+} from "lucide-react";
+import "./Login.css";
 
-export default function Login({ onLogin, onNavigateSignup }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+const ROLES = [
+  {
+    key: "student",
+    label: "Student",
+    icon: GraduationCap,
+    idLabel: "College email",
+    idPlaceholder: "you@university.edu",
+    cta: "Enter as student",
+  },
+  {
+    key: "company",
+    label: "Company",
+    icon: Building2,
+    idLabel: "Work email",
+    idPlaceholder: "recruiter@company.com",
+    cta: "Enter as staff",
+  },
+  {
+    key: "employee",
+    label: "Employee",
+    icon: Briefcase,
+    idLabel: "Staff ID / email",
+    idPlaceholder: "staff.id@campuslink.in",
+    cta: "Enter as employee",
+  },
+];
+
+export default function Login({ onLogin, onNavigate }) {
+  const [active, setActive] = useState("student");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [feedback, setFeedback] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const role = ROLES.find((r) => r.key === active);
+  const Icon = role.icon;
 
   function handleSubmit(e) {
     e.preventDefault();
 
     if (!email || !password) {
-      setFeedback({ type: 'error', message: 'Please enter both email and password.' });
+      setFeedback({ type: "error", message: "Please fill in both fields." });
       return;
     }
 
@@ -21,81 +61,142 @@ export default function Login({ onLogin, onNavigateSignup }) {
     // Replace with real auth call
     setTimeout(() => {
       setSubmitting(false);
-      setFeedback({ type: 'success', message: 'Signed in successfully.' });
-      onLogin?.({ email, password });
+      setFeedback({ type: "success", message: "Signed in successfully." });
+      onLogin?.({ email, password, role: active });
     }, 600);
   }
 
   return (
-    <div className="lp-root">
-      <div className="lp-orb lp-orb-1" />
-      <div className="lp-orb lp-orb-2" />
-
-      <div className="lp-card">
-        {/* Brand */}
-        <div className="lp-brand">
-          <div className="lp-brand-icon">
-            <svg width="18" height="18" viewBox="0 0 20 20" fill="#fff">
-              <path d="M10 2L3 6v7l5 3 7-3.5L3 8.5V15l7 3.5 5-3V4z" />
-            </svg>
+    <div className="lp-page">
+      <div className="lp-wrap">
+        {/* Wordmark */}
+        <div className="lp-wordmark-row">
+          <div className="lp-logo-circle">
+            <span className="lp-logo-letter">C</span>
           </div>
-          <span className="lp-brand-name">MyProject</span>
+          <p className="lp-wordmark">CampusLink</p>
         </div>
 
-        {/* Heading */}
-        <h1 className="lp-h1">Login Here</h1>
-        <p className="lp-sub">Welcome back you've been missed!</p>
-
-        {/* Feedback */}
-        {feedback && (
-          <div className="lp-feedback" data-type={feedback.type}>
-            {feedback.message}
+        {/* Badge clip / lanyard */}
+        <div className="lp-lanyard-row">
+          <div className="lp-lanyard">
+            <div className="lp-lanyard-hole" />
           </div>
-        )}
+        </div>
 
-        <form className="lp-form" onSubmit={handleSubmit}>
-          <div className="lp-field">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M22 6 12 13 2 6" />
-              <path d="M2 6h20v12H2z" />
-            </svg>
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoComplete="email"
-            />
-          </div>
-
-          <div className="lp-field">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="3" y="11" width="18" height="11" rx="2" />
-              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-            </svg>
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
-            />
+        {/* Badge card */}
+        <div className="lp-card">
+          {/* Role tabs */}
+          <div className="lp-tabs-row">
+            {ROLES.map((r) => {
+              const RIcon = r.icon;
+              const isActive = r.key === active;
+              return (
+                <button
+                  key={r.key}
+                  type="button"
+                  onClick={() => {
+                    setActive(r.key);
+                    setFeedback(null);
+                  }}
+                  className={`lp-tab-button${isActive ? " active" : ""}`}
+                >
+                  <RIcon size={15} strokeWidth={2} />
+                  {r.label}
+                </button>
+              );
+            })}
           </div>
 
-          <button type="button" className="lp-forgot">
-            Forgot your password?
-          </button>
+          <div className="lp-card-body">
+            {/* Seal + role heading */}
+            <div className="lp-heading-row">
+              <div className="lp-seal">
+                <Icon size={18} color="#C9A227" strokeWidth={2} />
+              </div>
+              <div>
+                <p className="lp-heading-title">Sign in</p>
+                <p className="lp-heading-subtitle">
+                  Access your {role.label.toLowerCase()} dashboard
+                </p>
+              </div>
+            </div>
 
-          <button type="submit" className="lp-btn-primary" disabled={submitting}>
-            {submitting ? 'Signing in…' : 'Sign in'}
-          </button>
-        </form>
+            <form onSubmit={handleSubmit}>
+              <div className="lp-field-group">
+                <label className="lp-label">{role.idLabel}</label>
+                <input
+                  type="text"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder={role.idPlaceholder}
+                  className="lp-input"
+                />
+              </div>
 
-        <p className="lp-divider">Or continue with</p>
+              <div className="lp-field-group">
+                <div className="lp-label-row">
+                  <label className="lp-label">Password</label>
+                  <a href="#" className="lp-forgot-link">
+                    Forgot password?
+                  </a>
+                </div>
+                <div className="lp-password-wrap">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="lp-input lp-input-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="lp-eye-button"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
 
-        <button className="lp-switch" onClick={onNavigateSignup}>
-          Don't have an account? <strong>Sign up</strong>
-        </button>
+              {feedback && (
+                <div className={`lp-feedback ${feedback.type}`}>
+                  {feedback.message}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={submitting}
+                className="lp-submit-button"
+              >
+                {submitting ? "Signing in..." : role.cta}
+                {!submitting && <ArrowRight size={15} />}
+              </button>
+            </form>
+
+            <div className="lp-footer">
+              New to CampusLink?{" "}
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onNavigate?.("signup");
+                }}
+                className="lp-footer-link"
+              >
+                Create an account
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <p className="lp-helper-text">
+          Choosing the wrong tab? Switch above — each role sees a different dashboard after sign in.
+        </p>
       </div>
     </div>
   );
