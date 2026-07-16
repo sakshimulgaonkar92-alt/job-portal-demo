@@ -1,17 +1,20 @@
 import { useState } from 'react';
+import api from '../api/axios';
 import './auth.css';
 
 export default function Signup({ onSignup, onNavigateLogin }) {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [role, setRole] = useState('student');
   const [feedback, setFeedback] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
 
-    if (!email || !password || !confirmPassword) {
+    if (!name || !email || !password || !confirmPassword) {
       setFeedback({ type: 'error', message: 'Please fill in all fields.' });
       return;
     }
@@ -24,12 +27,23 @@ export default function Signup({ onSignup, onNavigateLogin }) {
     setSubmitting(true);
     setFeedback(null);
 
-    // Replace with real signup call
-    setTimeout(() => {
+    try {
+      const res = await api.post('/users/register', { name, email, password, role });
+      const { token, user } = res.data;
+
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+
       setSubmitting(false);
       setFeedback({ type: 'success', message: 'Account created successfully.' });
-      onSignup?.({ email, password });
-    }, 600);
+      onSignup?.(user);
+    } catch (err) {
+      setSubmitting(false);
+      setFeedback({
+        type: 'error',
+        message: err.response?.data?.error || 'Signup failed. Try again.',
+      });
+    }
   }
 
   return (
@@ -60,6 +74,20 @@ export default function Signup({ onSignup, onNavigateLogin }) {
         )}
 
         <form className="lp-form" onSubmit={handleSubmit}>
+          <div className="lp-field">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Full name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              autoComplete="name"
+            />
+          </div>
+
           <div className="lp-field">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M22 6 12 13 2 6" />
@@ -100,6 +128,17 @@ export default function Signup({ onSignup, onNavigateLogin }) {
               onChange={(e) => setConfirmPassword(e.target.value)}
               autoComplete="new-password"
             />
+          </div>
+
+          <div className="lp-field">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M3 6h18M3 12h18M3 18h18" />
+            </svg>
+            <select value={role} onChange={(e) => setRole(e.target.value)}>
+              <option value="student">Student</option>
+              <option value="company">Company</option>
+              <option value="experienced">Experienced Employee</option>
+            </select>
           </div>
 
           <button type="submit" className="lp-btn-primary" disabled={submitting} style={{ marginTop: 4 }}>

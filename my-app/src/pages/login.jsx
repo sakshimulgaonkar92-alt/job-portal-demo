@@ -7,6 +7,7 @@ import {
   EyeOff,
   ArrowRight,
 } from "lucide-react";
+import api from "../api/axios";
 import "./Login.css";
 
 const ROLES = [
@@ -47,29 +48,51 @@ export default function Login({ onLogin, onNavigate }) {
   const role = ROLES.find((r) => r.key === active);
   const Icon = role.icon;
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
 
     if (!email || !password) {
-      setFeedback({ type: "error", message: "Please fill in both fields." });
+      setFeedback({
+        type: "error",
+        message: "Please fill in both fields.",
+      });
       return;
     }
 
     setSubmitting(true);
     setFeedback(null);
 
-    // Replace with real auth call
-    setTimeout(() => {
+    try {
+      const res = await api.post("/users/login", {
+        email,
+        password,
+      });
+
+      const { token, user } = res.data;
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+
       setSubmitting(false);
-      setFeedback({ type: "success", message: "Signed in successfully." });
-      onLogin?.({ email, password, role: active });
-    }, 600);
+      setFeedback({
+        type: "success",
+        message: "Signed in successfully.",
+      });
+
+      onLogin?.(user);
+    } catch (err) {
+      setSubmitting(false);
+      setFeedback({
+        type: "error",
+        message:
+          err.response?.data?.error || "Login failed. Try again.",
+      });
+    }
   }
 
   return (
     <div className="lp-page">
       <div className="lp-wrap">
-        {/* Wordmark */}
         <div className="lp-wordmark-row">
           <div className="lp-logo-circle">
             <span className="lp-logo-letter">C</span>
@@ -77,20 +100,18 @@ export default function Login({ onLogin, onNavigate }) {
           <p className="lp-wordmark">CampusLink</p>
         </div>
 
-        {/* Badge clip / lanyard */}
         <div className="lp-lanyard-row">
           <div className="lp-lanyard">
             <div className="lp-lanyard-hole" />
           </div>
         </div>
 
-        {/* Badge card */}
         <div className="lp-card">
-          {/* Role tabs */}
           <div className="lp-tabs-row">
             {ROLES.map((r) => {
               const RIcon = r.icon;
               const isActive = r.key === active;
+
               return (
                 <button
                   key={r.key}
@@ -109,11 +130,15 @@ export default function Login({ onLogin, onNavigate }) {
           </div>
 
           <div className="lp-card-body">
-            {/* Seal + role heading */}
             <div className="lp-heading-row">
               <div className="lp-seal">
-                <Icon size={18} color="#C9A227" strokeWidth={2} />
+                <Icon
+                  size={18}
+                  color="#C9A227"
+                  strokeWidth={2}
+                />
               </div>
+
               <div>
                 <p className="lp-heading-title">Sign in</p>
                 <p className="lp-heading-subtitle">
@@ -124,7 +149,10 @@ export default function Login({ onLogin, onNavigate }) {
 
             <form onSubmit={handleSubmit}>
               <div className="lp-field-group">
-                <label className="lp-label">{role.idLabel}</label>
+                <label className="lp-label">
+                  {role.idLabel}
+                </label>
+
                 <input
                   type="text"
                   required
@@ -137,27 +165,44 @@ export default function Login({ onLogin, onNavigate }) {
 
               <div className="lp-field-group">
                 <div className="lp-label-row">
-                  <label className="lp-label">Password</label>
+                  <label className="lp-label">
+                    Password
+                  </label>
+
                   <a href="#" className="lp-forgot-link">
                     Forgot password?
                   </a>
                 </div>
+
                 <div className="lp-password-wrap">
                   <input
                     type={showPassword ? "text" : "password"}
                     required
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) =>
+                      setPassword(e.target.value)
+                    }
                     placeholder="••••••••"
                     className="lp-input lp-input-password"
                   />
+
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
+                    onClick={() =>
+                      setShowPassword(!showPassword)
+                    }
                     className="lp-eye-button"
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-label={
+                      showPassword
+                        ? "Hide password"
+                        : "Show password"
+                    }
                   >
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    {showPassword ? (
+                      <EyeOff size={16} />
+                    ) : (
+                      <Eye size={16} />
+                    )}
                   </button>
                 </div>
               </div>
@@ -173,8 +218,13 @@ export default function Login({ onLogin, onNavigate }) {
                 disabled={submitting}
                 className="lp-submit-button"
               >
-                {submitting ? "Signing in..." : role.cta}
-                {!submitting && <ArrowRight size={15} />}
+                {submitting
+                  ? "Signing in..."
+                  : role.cta}
+
+                {!submitting && (
+                  <ArrowRight size={15} />
+                )}
               </button>
             </form>
 
@@ -195,7 +245,8 @@ export default function Login({ onLogin, onNavigate }) {
         </div>
 
         <p className="lp-helper-text">
-          Choosing the wrong tab? Switch above — each role sees a different dashboard after sign in.
+          Choosing the wrong tab? Switch above — each role sees a
+          different dashboard after sign in.
         </p>
       </div>
     </div>
