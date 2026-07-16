@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../model/User');
 const Student = require('../model/Student');
 const Company = require('../model/Company');
-const ExperiencedEmployee = require('../model/ExperiencedEmployee');
+const Experiencedvetern = require('../model/Experiencedvetern');
 
 const JWT_SECRET = 'your_jwt_secret_key';
 
@@ -28,7 +28,7 @@ exports.registerUser = async (req, res) => {
     } else if (role === 'company') {
       profile = new Company({ user: user._id, ...profileData });
     } else if (role === 'experienced') {
-      profile = new ExperiencedEmployee({ user: user._id, ...profileData });
+      profile = new Experiencedvetern({ user: user._id, ...profileData });
     } else {
       return res.status(400).json({ error: 'Invalid role' });
     }
@@ -85,7 +85,7 @@ exports.getUserById = async (req, res) => {
     } else if (user.role === 'company') {
       profile = await Company.findOne({ user: user._id });
     } else if (user.role === 'experienced') {
-      profile = await ExperiencedEmployee.findOne({ user: user._id });
+      profile = await Experiencedvetern.findOne({ user: user._id });
     }
     res.json({ user, profile });
   } catch (err) {
@@ -101,7 +101,7 @@ exports.updateProfile = async (req, res) => {
     let Model;
     if (user.role === 'student') Model = Student;
     else if (user.role === 'company') Model = Company;
-    else if (user.role === 'experienced') Model = ExperiencedEmployee;
+    else if (user.role === 'experienced') Model = Experiencedvetern;
     const profile = await Model.findOneAndUpdate({ user: user._id }, req.body, { new: true });
     res.json(profile);
   } catch (err) {
@@ -116,7 +116,7 @@ exports.deleteUser = async (req, res) => {
     if (!user) return res.status(404).json({ error: 'User not found' });
     if (user.role === 'student') await Student.findOneAndDelete({ user: user._id });
     else if (user.role === 'company') await Company.findOneAndDelete({ user: user._id });
-    else if (user.role === 'experienced') await ExperiencedEmployee.findOneAndDelete({ user: user._id });
+    else if (user.role === 'experienced') await Experiencedvetern.findOneAndDelete({ user: user._id });
     await User.findByIdAndDelete(req.params.id);
     res.status(204).send();
   } catch (err) {

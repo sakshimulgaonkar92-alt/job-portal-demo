@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const experiencedEmployeeSchema = new mongoose.Schema({
+const experiencedveternSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   currentCompany: { type: String },
   yearsOfExperience: { type: Number, required: true },
@@ -9,4 +9,4 @@ const experiencedEmployeeSchema = new mongoose.Schema({
   resume: { type: String }
 });
 
-module.exports = mongoose.model('ExperiencedEmployee', experiencedEmployeeSchema);
+module.exports = mongoose.model('Experiencedvetern', experiencedveternSchema);

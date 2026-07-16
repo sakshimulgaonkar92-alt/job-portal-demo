@@ -137,7 +137,7 @@ export default function Signup({ onSignup, onNavigateLogin }) {
             <select value={role} onChange={(e) => setRole(e.target.value)}>
               <option value="student">Student</option>
               <option value="company">Company</option>
-              <option value="experienced">Experienced Employee</option>
+              <option value="experienced">Experienced vetern</option>
             </select>
           </div>
 
