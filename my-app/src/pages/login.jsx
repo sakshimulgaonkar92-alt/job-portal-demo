@@ -27,12 +27,12 @@ const ROLES = [
     cta: "Enter as staff",
   },
   {
-    key: "employee",
-    label: "Employee",
+    key: "Vetern",
+    label: "Vetern",
     icon: Briefcase,
     idLabel: "Staff ID / email",
     idPlaceholder: "staff.id@campuslink.in",
-    cta: "Enter as employee",
+    cta: "Enter as Vetern",
   },
 ];
 
