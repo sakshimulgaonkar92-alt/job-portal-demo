@@ -1,5 +1,5 @@
 const Application = require("../models/Application");
-const Payment = require("../models/Payment");
+
 
 // GET /api/reports/hiring-funnel  (admin/employer/recruiter)
 const getHiringFunnel = async (req, res, next) => {
