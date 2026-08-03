@@ -1,46 +1,75 @@
 require("dotenv").config();
-const express = require('express');
-const cors = require('cors');
-const connectDB = require('./db');
-const jobRoutes = require('./routes/jobRoutes');
-const userRoutes = require('./routes/userRoutes');
+const express = require("express");
+const cors = require("cors");
+const http = require("http");
+const { Server } = require("socket.io");
+const connectDB = require("./config/db");
+const errorHandler = require("./middleware/errorHandler");
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+// Route imports
+const authRoutes = require("./routes/authRoutes");
+const jobRoutes = require("./routes/jobRoutes");
+const searchRoutes = require("./routes/searchRoutes");
+const profileRoutes = require("./routes/profileRoutes");
+const applicationRoutes = require("./routes/applicationRoutes");
+const messageRoutes = require("./routes/messageRoutes");
+const interviewRoutes = require("./routes/interviewRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
+const reportRoutes = require("./routes/reportRoutes");
 
-// Middleware
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Connect to MongoDB
 connectDB();
 
-// Simple request logger
+const app = express();
+const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: { origin: process.env.CLIENT_URL || "*" },
+});
+
+// Make io available to controllers via req.io (see messageController.js)
 app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  req.io = io;
   next();
 });
 
-// Routes
-app.get('/', (req, res) => {
-  res.json({ message: 'Job Portal Server is running!' });
-});
+app.use(cors({ origin: process.env.CLIENT_URL || "*" }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.use('/api/jobs', jobRoutes);
-app.use('/api/users', userRoutes);
+// Health check
+app.get("/api/health", (req, res) => res.json({ status: "ok", timestamp: new Date() }));
+
+// Mount routes
+app.use("/api/auth", authRoutes);
+app.use("/api/jobs", jobRoutes);
+app.use("/api/search", searchRoutes);
+app.use("/api/profile", profileRoutes);
+app.use("/api/applications", applicationRoutes);
+app.use("/api/messages", messageRoutes);
+app.use("/api/interviews", interviewRoutes);
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/reports", reportRoutes);
 
 // 404 handler
-app.use((req, res) => {
-  res.status(404).json({ error: 'Route not found' });
+app.use((req, res) => res.status(404).json({ message: "Route not found" }));
+
+// Central error handler (must be last)
+app.use(errorHandler);
+
+// Socket.io: join a room per application thread for scoped real-time messaging
+io.on("connection", (socket) => {
+  socket.on("joinApplication", (applicationId) => {
+    socket.join(`application:${applicationId}`);
+  });
+
+  socket.on("disconnect", () => {
+    // no-op for now
+  });
 });
 
-// Error handler
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Something went wrong' });
-});
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => console.log(`JobConnect API running on port ${PORT}`));
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+module.exports = { app, server, io };
