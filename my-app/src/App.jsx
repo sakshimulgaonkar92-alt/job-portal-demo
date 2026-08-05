@@ -2,20 +2,48 @@ import { useState } from 'react';
 import Onboarding from './pages/Onboarding';
 import Login from './pages/login';
 import Signup from './pages/Signup';
-import Dashboard from './pages/dashboard';
+import StudentDashboard from './pages/dashboard';
+import EmployerDashboard from './pages/EmployerDashboard';
+import RecruiterDashboard from './pages/RecruiterDashboard';
+import AdminDashboard from './pages/AdminDashboard';
+
+const ROLE_DASHBOARDS = {
+  job_seeker: StudentDashboard,
+  employer: EmployerDashboard,
+  recruiter: RecruiterDashboard,
+  admin: AdminDashboard,
+};
 
 export default function App() {
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [page, setPage] = useState('onboarding'); // 'onboarding' | 'login' | 'signup'
+  const [user, setUser] = useState(null);
+  const [page, setPage] = useState('onboarding');
 
-  if (loggedIn) {
-    return <Dashboard onLogout={() => setLoggedIn(false)} />;
+  function handleLogout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+    setPage('onboarding');
+  }
+
+  if (user) {
+    const DashboardComponent = ROLE_DASHBOARDS[user.role];
+
+    if (!DashboardComponent) {
+      return (
+        <div style={{ padding: 40, textAlign: 'center' }}>
+          <h2>Unrecognized account role: {user.role}</h2>
+          <button onClick={handleLogout}>Back to login</button>
+        </div>
+      );
+    }
+
+    return <DashboardComponent onLogout={handleLogout} studentName={user.name} user={user} />;
   }
 
   if (page === 'login') {
     return (
       <Login
-        onLogin={() => setLoggedIn(true)}
+        onLogin={(loggedInUser) => setUser(loggedInUser)}
         onNavigateSignup={() => setPage('signup')}
       />
     );
@@ -24,7 +52,7 @@ export default function App() {
   if (page === 'signup') {
     return (
       <Signup
-        onSignup={() => setLoggedIn(true)}
+        onSignup={(newUser) => setUser(newUser)}
         onNavigateLogin={() => setPage('login')}
       />
     );
