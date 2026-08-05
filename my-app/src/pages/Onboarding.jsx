@@ -1,4 +1,4 @@
-import './auth.css';
+import './Auth.css';
 
 export default function Onboarding({ onLogin, onRegister }) {
   return (

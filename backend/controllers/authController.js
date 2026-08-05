@@ -5,10 +5,24 @@ const Recruiter = require("../models/Recruiter");
 const generateToken = require("../utils/generateToken");
 const { generateOtp, verifyOtp } = require("../utils/otp");
 
+// Public-facing role names (used by the frontend) mapped to internal role values
+// (used everywhere else in the backend: permissions, models, etc.)
+const ROLE_ALIASES = {
+  student: "job_seeker",
+  company: "employer",
+  experienced: "recruiter",
+};
+
 // POST /api/auth/register
-const register = async (req, res, next) => {
+const signup = async (req, res, next) => {
   try {
-    const { name, email, mobile, password, role, companyName, agencyName } = req.body;
+    const { name, email, mobile, password, companyName, agencyName } = req.body;
+    let { role } = req.body;
+
+    // Translate public-facing role name to the internal role value, if needed
+    if (role && ROLE_ALIASES[role]) {
+      role = ROLE_ALIASES[role];
+    }
 
     if (!name || !email || !password || !role) {
       return res.status(400).json({ message: "name, email, password and role are required" });
@@ -111,4 +125,4 @@ const verify = async (req, res, next) => {
   }
 };
 
-module.exports = { register, login, sendOtp, verify };
+module.exports = { signup, login, sendOtp, verify };

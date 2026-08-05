@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import api from '../api/axios';
-import './auth.css';
+import './Auth.css';
 
 export default function Signup({ onSignup, onNavigateLogin }) {
   const [name, setName] = useState('');
@@ -28,7 +28,7 @@ export default function Signup({ onSignup, onNavigateLogin }) {
     setFeedback(null);
 
     try {
-      const res = await api.post('/users/register', { name, email, password, role });
+      const res = await api.post('/auth/register', { name, email, password, role });
       const { token, user } = res.data;
 
       localStorage.setItem('token', token);
@@ -39,7 +39,7 @@ export default function Signup({ onSignup, onNavigateLogin }) {
       onSignup?.(user);
     } catch (err) {
       setSubmitting(false);
-      setFeedback({
+     setFeedback({
         type: 'error',
         message: err.response?.data?.error || 'Signup failed. Try again.',
       });

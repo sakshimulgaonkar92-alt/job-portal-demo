@@ -63,7 +63,7 @@ export default function Login({ onLogin, onNavigate }) {
     setFeedback(null);
 
     try {
-      const res = await api.post("/users/login", {
+      const res = await api.post("/auth/login", {
         email,
         password,
       });
